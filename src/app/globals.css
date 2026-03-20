@@ -1,26 +1,92 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* ============================================
+   LDSM Design Tokens
+   LINE Design System for Messenger - Foundation
+   ============================================ */
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Typography Scale (LDSM) */
+  --font-size-heading1: 24px;
+  --font-size-heading2: 17px;
+  --font-size-heading3: 14px;
+  --font-size-title1: 23px;
+  --font-size-title2: 19px;
+  --font-size-title3: 16px;
+  --font-size-title4: 15px;
+  --font-size-title5: 14px;
+  --font-size-body1: 16px;
+  --font-size-body2: 14px;
+  --font-size-body3: 13px;
+  --font-size-body4: 12px;
+
+  /* Font Weight */
+  --font-weight-heavy: 900;
+  --font-weight-bold: 700;
+  --font-weight-semibold: 600;
+  --font-weight-medium: 500;
+  --font-weight-regular: 400;
+
+  /* LINE Color Palette */
+  --color-line-green: #06C755;
+
+  --color-line-blue-400: #5B9CF6;
+  --color-line-blue-500: #3B82F6;
+  --color-line-blue-600: #2563EB;
+  --color-line-blue-700: #1D4ED8;
+
+  --color-line-navy-400: #4A6FA5;
+  --color-line-navy-500: #3B5998;
+  --color-line-navy-600: #2D4373;
+  --color-line-navy-700: #1E2F50;
+  --color-line-navy-800: #162240;
+  --color-line-navy-900: #0D1526;
+
+  --color-line-red-400: #F87171;
+
+  --color-line-gray-100: #F5F5F5;
+  --color-line-gray-150: #EFEFEF;
+  --color-line-gray-200: #E8E8E8;
+  --color-line-gray-250: #E0E0E0;
+  --color-line-gray-300: #D4D4D4;
+  --color-line-gray-350: #C8C8C8;
+  --color-line-gray-400: #BDBDBD;
+  --color-line-gray-500: #9E9E9E;
+  --color-line-gray-600: #757575;
+  --color-line-gray-650: #616161;
+  --color-line-gray-700: #525252;
+  --color-line-gray-750: #424242;
+  --color-line-gray-770: #3D3D3D;
+  --color-line-gray-800: #333333;
+  --color-line-gray-850: #292929;
+  --color-line-gray-870: #242424;
+  --color-line-gray-900: #1A1A1A;
+
+  /* Layout */
+  --spacing-screen-margin: 16px;
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #1A1A1A;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #0D1526;
+    --foreground: #F5F5F5;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans KR', 'Segoe UI', sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* Minimum font size guard */
+* {
+  min-font-size: 12px;
 }

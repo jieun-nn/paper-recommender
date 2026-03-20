@@ -1,65 +1,126 @@
-import Image from "next/image";
+'use client'
 
-export default function Home() {
+import { useState, useEffect, useCallback } from 'react'
+import PaperCard from '@/components/PaperCard'
+import FieldSidebar from '@/components/FieldSidebar'
+import SearchBar from '@/components/SearchBar'
+import type { Paper, FieldLabel, SortOption } from '@/types/paper'
+
+export default function HomePage() {
+  const [selectedField, setSelectedField] = useState<FieldLabel>('전체')
+  const [sort, setSort] = useState<SortOption>('latest')
+  const [papers, setPapers] = useState<Paper[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const fetchPapers = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const params = new URLSearchParams({ sort })
+      if (selectedField !== '전체') params.set('field', selectedField)
+      const res = await fetch(`/api/papers?${params}`)
+      if (!res.ok) throw new Error('논문을 불러오는 데 실패했습니다.')
+      const { data } = await res.json()
+      setPapers(data ?? [])
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.')
+    } finally {
+      setLoading(false)
+    }
+  }, [selectedField, sort])
+
+  useEffect(() => {
+    fetchPapers()
+  }, [fetchPapers])
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="max-w-6xl mx-auto px-4 py-6">
+      {/* Top bar */}
+      <div className="flex items-center gap-4 mb-6">
+        <SearchBar />
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="text-[13px] text-[var(--color-line-gray-500)]">정렬:</span>
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value as SortOption)}
+            className="text-[13px] px-2 py-1.5 rounded-lg border border-[var(--color-line-gray-250)]
+              bg-white text-[var(--color-line-gray-700)] focus:outline-none
+              focus:border-[var(--color-line-navy-500)] cursor-pointer"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            <option value="latest">최신순</option>
+            <option value="citations">인용순</option>
+          </select>
         </div>
-      </main>
+      </div>
+
+      <div className="flex gap-6">
+        {/* Sidebar */}
+        <FieldSidebar selected={selectedField} onChange={setSelectedField} />
+
+        {/* Paper grid */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-[17px] font-bold text-[var(--color-line-gray-900)]">
+              {selectedField === '전체' ? '전체 논문' : `${selectedField} 논문`}
+            </h1>
+            {!loading && (
+              <span className="text-[13px] text-[var(--color-line-gray-400)]">
+                {papers.length}편
+              </span>
+            )}
+          </div>
+
+          {loading && <LoadingSkeleton />}
+
+          {!loading && error && (
+            <div className="rounded-2xl border border-[var(--color-line-red-400)] bg-red-50 p-6 text-center">
+              <p className="text-[14px] text-red-600">{error}</p>
+              <button
+                onClick={fetchPapers}
+                className="mt-3 text-[13px] text-[var(--color-line-navy-500)] hover:underline"
+              >
+                다시 시도
+              </button>
+            </div>
+          )}
+
+          {!loading && !error && papers.length === 0 && (
+            <div className="rounded-2xl border border-[var(--color-line-gray-200)] p-12 text-center">
+              <p className="text-[14px] text-[var(--color-line-gray-500)]">
+                해당 분야의 논문이 없습니다.
+              </p>
+            </div>
+          )}
+
+          {!loading && !error && papers.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {papers.map((paper) => (
+                <PaperCard key={paper.id} paper={paper} />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
-  );
+  )
+}
+
+function LoadingSkeleton() {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className="bg-[var(--color-line-gray-100)] rounded-2xl p-4 animate-pulse">
+          <div className="h-3 w-16 bg-[var(--color-line-gray-250)] rounded-full mb-3" />
+          <div className="h-4 bg-[var(--color-line-gray-250)] rounded mb-2" />
+          <div className="h-4 w-3/4 bg-[var(--color-line-gray-250)] rounded mb-3" />
+          <div className="h-16 bg-[var(--color-line-gray-200)] rounded-lg mb-3" />
+          <div className="flex gap-2">
+            <div className="h-3 w-12 bg-[var(--color-line-gray-200)] rounded-full" />
+            <div className="h-3 w-16 bg-[var(--color-line-gray-200)] rounded-full" />
+          </div>
+        </div>
+      ))}
+    </div>
+  )
 }
