@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import AuthButton from '@/components/AuthButton'
 
 export const metadata: Metadata = {
   title: 'PaperFeed — 분야별 최신 논문 추천',
@@ -10,7 +11,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ko" className="h-full antialiased">
       <body className="min-h-full flex flex-col bg-[var(--background)] text-[var(--foreground)]">
-        {/* Global Header */}
         <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-[var(--color-line-gray-200)]">
           <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
             <a href="/" className="flex items-center gap-2">
@@ -20,6 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </a>
             <nav className="flex items-center gap-4 text-[13px] text-[var(--color-line-gray-600)]">
               <a href="/" className="hover:text-[var(--color-line-navy-500)] transition-colors">홈</a>
+              <AuthButton />
             </nav>
           </div>
         </header>

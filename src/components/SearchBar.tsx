@@ -1,22 +1,28 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 
 interface SearchBarProps {
   defaultValue?: string
   placeholder?: string
+  onSearch?: (q: string) => void
 }
 
-export default function SearchBar({ defaultValue = '', placeholder = '논문 제목, 저자, 키워드 검색...' }: SearchBarProps) {
+export default function SearchBar({
+  defaultValue = '',
+  placeholder = '논문 제목, 저자, 키워드 검색...',
+  onSearch,
+}: SearchBarProps) {
   const [value, setValue] = useState(defaultValue)
-  const router = useRouter()
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    const q = value.trim()
-    if (!q) return
-    router.push(`/?q=${encodeURIComponent(q)}`)
+    onSearch?.(value.trim())
+  }
+
+  function handleClear() {
+    setValue('')
+    onSearch?.('')
   }
 
   return (
@@ -53,7 +59,7 @@ export default function SearchBar({ defaultValue = '', placeholder = '논문 제
         {value && (
           <button
             type="button"
-            onClick={() => setValue('')}
+            onClick={handleClear}
             className="absolute right-3 text-[var(--color-line-gray-400)] hover:text-[var(--color-line-gray-600)]"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">

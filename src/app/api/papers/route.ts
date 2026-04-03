@@ -2,29 +2,42 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 import type { FieldLabel, SortOption } from '@/types/paper'
 
+const PAGE_SIZE = 20
+
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl
   const field = searchParams.get('field') as FieldLabel | null
+  const subField = searchParams.get('sub_field')
   const sort = (searchParams.get('sort') ?? 'latest') as SortOption
   const q = searchParams.get('q')
-  const limit = Math.min(Number(searchParams.get('limit') ?? '20'), 50)
+  const page = Math.max(1, Number(searchParams.get('page') ?? '1'))
+  const limit = searchParams.get('limit') ? Math.min(Number(searchParams.get('limit')), 50) : PAGE_SIZE
+  const offset = (page - 1) * limit
 
-  let query = supabase
-    .from('papers')
-    .select('*, summary:summaries(summary_ko, keywords)')
-    .limit(limit)
-
-  // 분야 필터
-  if (field && field !== '전체') {
-    query = query.eq('field_label', field)
+  function applyFilters<T extends ReturnType<typeof supabase.from>>(query: T): T {
+    if (subField) {
+      query = (query as any).eq('sub_field', subField)
+    } else if (field && field !== '전체') {
+      query = (query as any).eq('field_label', field)
+    }
+    if (q) query = (query as any).or(`title.ilike.%${q}%,abstract.ilike.%${q}%`)
+    return query
   }
 
-  // 검색
-  if (q) {
-    query = query.or(`title.ilike.%${q}%,abstract.ilike.%${q}%`)
-  }
+  // count 쿼리
+  const countQuery = applyFilters(
+    supabase.from('papers').select('id', { count: 'exact', head: true })
+  )
+  const { count } = await countQuery
 
-  // 정렬
+  // 데이터 쿼리
+  let query = applyFilters(
+    supabase
+      .from('papers')
+      .select('*, summary:summaries(summary_ko, keywords)')
+      .range(offset, offset + limit - 1) as any
+  )
+
   if (sort === 'citations') {
     query = query.order('citation_count', { ascending: false })
   } else {
@@ -38,11 +51,13 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ data: null, error: error.message }, { status: 500 })
   }
 
-  // summaries는 배열로 반환되므로 첫 번째 요소를 summary로 변환
-  const papers = (data ?? []).map((p) => ({
+  const papers = (data ?? []).map((p: any) => ({
     ...p,
     summary: Array.isArray(p.summary) ? p.summary[0] ?? null : p.summary ?? null,
   }))
 
-  return NextResponse.json({ data: papers })
+  const total = count ?? 0
+  const hasMore = offset + papers.length < total
+
+  return NextResponse.json({ data: papers, total, hasMore, page })
 }

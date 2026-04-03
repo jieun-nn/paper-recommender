@@ -5,6 +5,7 @@ export interface Paper {
   authors: string[]
   abstract: string | null
   field_label: string | null
+  sub_field: string | null
   arxiv_categories: string[]
   published_at: string | null
   citation_count: number
@@ -13,6 +14,16 @@ export interface Paper {
   created_at: string
   updated_at: string
   summary?: Summary
+}
+
+export interface UserProfile {
+  id: string
+  degree_level: 'bachelor' | 'graduate'
+  department: string
+  sub_field: string | null
+  field_label: string | null
+  use_dept_recs: boolean
+  onboarding_done: boolean
 }
 
 export interface Summary {

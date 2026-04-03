@@ -24,15 +24,23 @@ export default function PaperCard({ paper }: PaperCardProps) {
   return (
     <Link href={`/paper/${encodeURIComponent(paper.id)}`}>
       <article className="group bg-white border border-[var(--color-line-gray-200)] rounded-2xl p-4
-        hover:border-[var(--color-line-navy-400)] hover:shadow-md transition-all cursor-pointer">
+        hover:border-[var(--color-line-navy-400)] hover:shadow-md transition-all cursor-pointer h-full flex flex-col">
 
-        {/* 분야 태그 */}
-        {paper.field_label && (
-          <span className="inline-block text-[12px] font-medium px-2 py-0.5 rounded-full mb-2
-            bg-[var(--color-line-navy-400)] text-white">
-            {paper.field_label}
-          </span>
-        )}
+        {/* 분야 태그 + 세부전공 태그 */}
+        <div className="flex flex-wrap gap-1.5 mb-2">
+          {paper.field_label && (
+            <span className="inline-block text-[12px] font-medium px-2 py-0.5 rounded-full
+              bg-[var(--color-line-navy-400)] text-white">
+              {paper.field_label}
+            </span>
+          )}
+          {paper.sub_field && (
+            <span className="inline-block text-[12px] px-2 py-0.5 rounded-full
+              bg-[var(--color-line-gray-150)] text-[var(--color-line-gray-600)] border border-[var(--color-line-gray-200)]">
+              {paper.sub_field}
+            </span>
+          )}
+        </div>
 
         {/* 제목 */}
         <h3 className="text-[15px] font-semibold text-[var(--color-line-gray-900)] leading-snug
