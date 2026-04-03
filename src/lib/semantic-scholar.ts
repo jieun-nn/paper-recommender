@@ -67,6 +67,7 @@ function toPaper(item: SemanticScholarPaper): Paper {
     field_label: item.fieldsOfStudy?.[0]
       ? inferFieldLabel([item.fieldsOfStudy[0]])
       : '기타',
+    sub_field: null,
     arxiv_categories: [],
     published_at: item.publicationDate ?? (item.year ? `${item.year}-01-01` : null),
     citation_count: item.citationCount ?? 0,

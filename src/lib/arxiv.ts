@@ -64,6 +64,7 @@ export async function fetchArxivPapers(options: ArxivFetchOptions = {}): Promise
       authors,
       abstract: cleanText(entry.summary ?? ''),
       field_label: inferFieldLabel(categories),
+      sub_field: null,
       arxiv_categories: categories,
       published_at: entry.published ?? null,
       citation_count: 0,

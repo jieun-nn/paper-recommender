@@ -14,29 +14,24 @@ export async function GET(req: NextRequest) {
   const limit = searchParams.get('limit') ? Math.min(Number(searchParams.get('limit')), 50) : PAGE_SIZE
   const offset = (page - 1) * limit
 
-  function applyFilters<T extends ReturnType<typeof supabase.from>>(query: T): T {
-    if (subField) {
-      query = (query as any).eq('sub_field', subField)
-    } else if (field && field !== '전체') {
-      query = (query as any).eq('field_label', field)
-    }
-    if (q) query = (query as any).or(`title.ilike.%${q}%,abstract.ilike.%${q}%`)
-    return query
-  }
-
   // count 쿼리
-  const countQuery = applyFilters(
-    supabase.from('papers').select('id', { count: 'exact', head: true })
-  )
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let countQuery: any = supabase.from('papers').select('id', { count: 'exact', head: true })
+  if (subField) countQuery = countQuery.eq('sub_field', subField)
+  else if (field && field !== '전체') countQuery = countQuery.eq('field_label', field)
+  if (q) countQuery = countQuery.or(`title.ilike.%${q}%,abstract.ilike.%${q}%`)
   const { count } = await countQuery
 
   // 데이터 쿼리
-  let query = applyFilters(
-    supabase
-      .from('papers')
-      .select('*, summary:summaries(summary_ko, keywords)')
-      .range(offset, offset + limit - 1) as any
-  )
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let query: any = supabase
+    .from('papers')
+    .select('*, summary:summaries(summary_ko, keywords)')
+    .range(offset, offset + limit - 1)
+
+  if (subField) query = query.eq('sub_field', subField)
+  else if (field && field !== '전체') query = query.eq('field_label', field)
+  if (q) query = query.or(`title.ilike.%${q}%,abstract.ilike.%${q}%`)
 
   if (sort === 'citations') {
     query = query.order('citation_count', { ascending: false })
@@ -51,6 +46,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ data: null, error: error.message }, { status: 500 })
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const papers = (data ?? []).map((p: any) => ({
     ...p,
     summary: Array.isArray(p.summary) ? p.summary[0] ?? null : p.summary ?? null,
