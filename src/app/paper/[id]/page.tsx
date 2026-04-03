@@ -11,8 +11,11 @@ export default async function PaperDetailPage({ params }: PageProps) {
   const { id } = await params
   const paperId = decodeURIComponent(id)
 
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
+    ?? (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000'}/api/papers/${encodeURIComponent(paperId)}`,
+    `${baseUrl}/api/papers/${encodeURIComponent(paperId)}`,
     { cache: 'no-store' }
   )
 
